@@ -1,0 +1,45 @@
+Grigore Cosmin
+332CC
+                    Tema 3 - Loader de Executabile
+                        Sisteme de Operare
+
+ORGANIZARE:
+    Am pornit de la scheletul oferit de echipa.
+    Pentru a retine paginile mapate ale unui segment, am folosit pointer-ul data al structurii 
+so_seg_t pe post de lista simplu inlantuita. Pentru asta am creat o structura SegmentPage care 
+contine ca valoare index-ul pagini mapate. Am creat functii de creare a unui pagini (newPage),
+de adaugare a unui pagini (setPageMapped) si de cautare a unui pagini(isMapped)
+    Initial, am initializat structurile interne. Am adaugat in masca de semnale
+semnalul SIGSEFV si am setat sa_flags pe SA_SIGINFO pentru a putea folosi handler-ul
+specificat de  sa_sigaction.
+    In handler, am luat prima data  din campul si_addr al parametrului info, adresa care a 
+provocat fault-ul. Am cautat apoi segmentul in care se afla adresa folosind functia findSegment()
+in care iterez prin fiecare segment al executabilului si vad daca se afla in adresele sale (in intervalul
+[segment->vaddr, segment->vaddr + segment->mem_size]).
+    Daca nu am gasit segmentul( segmentul returnat e NULL) execut handler-ul default si ies.
+    Calculez apoi pagina in care s-a declansat page fault-ul calculand offset-ul si impartind la size-ul 
+unei pagini.
+    Verific daca pagina este mapata deja folosind functia isMapped(), iar daca este apelez handler-ul default si
+ies
+    Daca nu sunt in cele doua cazuri de mai sus, mapez pagina in memorie cu drepturi de scriere, mapand fix, privat si 
+anonim.
+    Copiez apoi in pagina mapata datele din executabil.
+    Pentru a copia datele din executabil, am mapat executabilul in memorie folosind mmap pentru a-mi fi mai usor, astfel
+copierea datelor se rezuma la o copie a memoriei.
+    Dupa ce transfer datele, ii setez paginii mapate, permisiunile segment-ului si adaug pagina in lista de pagini mapate a 
+segmentului.
+    In so_execute(), deschid executabilul in mod Read Only si apoi ii aflu dimensiunea folosind fstat() si il mapez in 
+memorie in mod privat. Dupa executie demapez executabilul din memorie folosind munmap().
+    Pentru implementare m-am inspirat mult din exercitiul 5 din laboratorul 6.
+
+IMPLEMENTARE:
+    Tot enuntul este implementat insa nu imi trec 3 teste.
+    Mi-a fost destul de greu cu debug-ul.
+
+BIBLIOGRAFIE:
+    Laboratorul 4 SO
+    Laboratorul 5 SO
+    Laboratorul 6 SO (exercitiul 5 mai ales)
+
+GIT:
+    
